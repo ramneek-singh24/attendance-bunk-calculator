@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance & Bunk Calculator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/lucide-static@0.321.0/index.min.js"></script>
+  <style>
+    :root {
+      --bg: #090d16;
+      --card-bg: #111827;
+      --card-border: #1f2937;
+      --accent: #6366f1;
+      --accent-hover: #4f46e5;
+      --accent-light: rgba(99, 102, 241, 0.15);
+      --success: #10b981;
+      --success-light: rgba(16, 185, 129, 0.15);
+      --warning: #f59e0b;
+      --warning-light: rgba(245, 158, 11, 0.15);
+      --danger: #ef4444;
+      --danger-light: rgba(239, 68, 68, 0.15);
+      --text: #f9fafb;
+      --text-muted: #9ca3af;
+      --text-dim: #6b7280;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      padding-bottom: 40px;
+    }
+
+    header {
+      background: rgba(17, 24, 39, 0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--card-border);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      padding: 16px 24px;
+    }
+
+    .header-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .logo-area h1 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #818cf8, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .logo-area p {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .target-setter {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #1e293b;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      border: 1px solid var(--card-border);
+    }
+    .target-setter label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .target-setter input {
+      width: 50px;
+      background: transparent;
+      border: none;
+      color: #38bdf8;
+      font-size: 1rem;
+      font-weight: 700;
+      text-align: center;
+    }
+    .target-setter input:focus { outline: none; }
+
+    main {
+      max-width: 1200px;
+      margin: 24px auto;
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+    @media (min-width: 900px) {
+      .grid-2 { grid-template-columns: 1.2fr 0.8fr; }
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Overall Dashboard */
+    .dashboard-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+    @media(min-width: 600px) {
+      .dashboard-content {
+        flex-direction: row;
+        justify-content: space-around;
+      }
+    }
+
+    .radial-progress {
+      position: relative;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: conic-gradient(var(--accent) calc(var(--percent) * 1%), var(--card-border) 0);
+    }
+    .radial-progress::before {
+      content: '';
+      position: absolute;
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      background: var(--card-bg);
+    }
+    .radial-inner {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+    .radial-inner .percent-val {
+      font-size: 1.8rem;
+      font-weight: 800;
+    }
+    .radial-inner .percent-lbl {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .stats-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      width: 100%;
+      max-width: 320px;
+    }
+    .stat-box {
+      background: #1a2234;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .stat-box .lbl { font-size: 0.75rem; color: var(--text-muted); }
+    .stat-box .val { font-size: 1.2rem; font-weight: 700; margin-top: 2px; }
+
+    /* Smart Insights */
+    .insights-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .insight-item {
+      padding: 12px 16px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .insight-item.safe { background: var(--success-light); color: #34d399; border: 1px solid rgba(52, 211, 153, 0.2); }
+    .insight-item.warning { background: var(--warning-light); color: #fbbf24; border: 1px solid rgba(251, 191, 36, 0.2); }
+    .insight-item.danger { background: var(--danger-light); color: #f87171; border: 1px solid rgba(248, 113, 113, 0.2); }
+
+    /* Controls Bar */
+    .subject-header-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .btn {
+      background: var(--accent);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: background 0.2s;
+    }
+    .btn:hover { background: var(--accent-hover); }
+    .btn-sm { padding: 4px 10px; font-size: 0.8rem; }
+    .btn-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.3); }
+
+    /* Subject Cards */
+    .subjects-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+    @media(min-width: 600px) {
+      .subjects-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+    }
+
+    .subj-card {
+      background: #182232;
+      border: 1px solid var(--card-border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+    .subj-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .subj-title { font-weight: 700; font-size: 1.05rem; }
+    .subj-actions { display: flex; gap: 4px; }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 8px;
+      background: #2d3748;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.3s ease;
+    }
+
+    .subj-stats-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+    .subj-quick-btns {
+      display: flex;
+      gap: 8px;
+      margin-top: 4px;
+    }
+    .quick-btn {
+      flex: 1;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid var(--card-border);
+      background: #242f42;
+      color: var(--text);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+    }
+    .quick-btn:hover { background: #2e3c54; }
+
+    .subj-status-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 6px;
+      width: fit-content;
+    }
+
+    /* Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    .modal {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      padding: 24px;
+      border-radius: 16px;
+      width: 90%;
+      max-width: 400px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+    .form-group label { font-size: 0.85rem; color: var(--text-muted); }
+    .form-group input {
+      background: #182232;
+      border: 1px solid var(--card-border);
+      padding: 10px;
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+
+    /* Simulator */
+    .sim-inputs {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--text-dim);
+      font-size: 0.8rem;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-container">
+      <div class="logo-area">
+        <h1>Attendance & Bunk Calculator</h1>
+        <p>Know your attendance. Plan your classes. Stay on track.</p>
+      </div>
+      <div class="target-setter">
+        <label for="targetInput">Target %</label>
+        <input type="number" id="targetInput" value="75" min="1" max="100">
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="grid-2">
+      <!-- 1. Overall Attendance Dashboard -->
+      <div class="card">
+        <div class="card-title">Overall Dashboard</div>
+        <div class="dashboard-content">
+          <div class="radial-progress" id="overallRadial" style="--percent: 0;">
+            <div class="radial-inner">
+              <div class="percent-val" id="overallPercent">0%</div>
+              <div class="percent-lbl">Current</div>
+            </div>
+          </div>
+          <div class="stats-summary">
+            <div class="stat-box">
+              <div class="lbl">Total Classes</div>
+              <div class="val" id="totalConducted">0</div>
+            </div>
+            <div class="stat-box">
+              <div class="lbl">Attended</div>
+              <div class="val" id="totalAttended" style="color: #34d399;">0</div>
+            </div>
+            <div class="stat-box">
+              <div class="lbl">Missed</div>
+              <div class="val" id="totalMissed" style="color: #f87171;">0</div>
+            </div>
+            <div class="stat-box">
+              <div class="lbl">Safe Bunks Left</div>
+              <div class="val" id="totalBunks" style="color: #60a5fa;">0</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Smart Insights -->
+      <div class="card">
+        <div class="card-title">Smart Insights</div>
+        <div class="insights-list" id="insightsList">
+          <div class="insight-item safe">Add subjects to view smart attendance insights.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. Subject-wise Attendance -->
+    <div class="card">
+      <div class="subject-header-bar">
+        <div class="card-title" style="margin-bottom:0;">Subject-Wise Attendance</div>
+        <button class="btn" onclick="openModal()">+ Add Subject</button>
+      </div>
+      <div class="subjects-grid" id="subjectsGrid"></div>
+    </div>
+
+    <!-- 3 & 4. Standalone Calculator Simulator -->
+    <div class="card">
+      <div class="card-title">Quick Scenario Simulator</div>
+      <div class="sim-inputs">
+        <div class="form-group">
+          <label>Classes Attended</label>
+          <input type="number" id="simAttended" value="30" oninput="runSim()">
+        </div>
+        <div class="form-group">
+          <label>Total Conducted</label>
+          <input type="number" id="simTotal" value="40" oninput="runSim()">
+        </div>
+      </div>
+      <div id="simResult" class="insight-item safe"></div>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <h3 style="margin-bottom: 16px;" id="modalTitle">Add New Subject</h3>
+      <input type="hidden" id="editIndex">
+      <div class="form-group">
+        <label>Subject Name</label>
+        <input type="text" id="subjName" placeholder="e.g. Mathematics">
+      </div>
+      <div class="form-group">
+        <label>Classes Attended</label>
+        <input type="number" id="subjAttended" value="0" min="0">
+      </div>
+      <div class="form-group">
+        <label>Classes Missed</label>
+        <input type="number" id="subjMissed" value="0" min="0">
+      </div>
+      <div style="display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px;">
+        <button class="btn btn-danger" onclick="closeModal()">Cancel</button>
+        <button class="btn" onclick="saveSubject()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>Attendance & Bunk Calculator &copy; 2026. Data auto-saved in your browser.</p>
+  </footer>
+
+  <script>
+    let targetPct = 75;
+    let subjects = JSON.parse(localStorage.getItem('attendance_subjects')) || [
+      { name: "Computer Networks", attended: 28, missed: 4 },
+      { name: "Database Systems", attended: 18, missed: 8 },
+      { name: "Operating Systems", attended: 15, missed: 7 }
+    ];
+
+    document.getElementById('targetInput').addEventListener('input', (e) => {
+      targetPct = parseFloat(e.target.value) || 75;
+      render();
+    });
+
+    function saveToStorage() {
+      localStorage.setItem('attendance_subjects', JSON.stringify(subjects));
+    }
+
+    function calculateBunkAndRecovery(attended, total, target) {
+      if (total === 0) return { pct: 0, bunks: 0, recovery: 0 };
+      const pct = (attended / total) * 100;
+      const t = target / 100;
+
+      if (pct >= target) {
+        // Can miss X future classes: (attended) / (total + X) >= t  =>  X <= (attended - t * total) / t
+        const bunks = Math.floor((attended - t * total) / t);
+        return { pct, bunks: Math.max(0, bunks), recovery: 0 };
+      } else {
+        // Need to attend Y consecutive classes: (attended + Y) / (total + Y) >= t  =>  Y >= (t * total - attended) / (1 - t)
+        const recovery = Math.ceil((t * total - attended) / (1 - t));
+        return { pct, bunks: 0, recovery: Math.max(0, recovery) };
+      }
+    }
+
+    function render() {
+      let totAttended = 0, totMissed = 0;
+      subjects.forEach(s => {
+        totAttended += s.attended;
+        totMissed += s.missed;
+      });
+      const totConducted = totAttended + totMissed;
+
+      // Dashboard stats
+      const overall = calculateBunkAndRecovery(totAttended, totConducted, targetPct);
+      document.getElementById('overallRadial').style.setProperty('--percent', overall.pct.toFixed(1));
+      document.getElementById('overallPercent').innerText = overall.pct.toFixed(1) + '%';
+      document.getElementById('totalConducted').innerText = totConducted;
+      document.getElementById('totalAttended').innerText = totAttended;
+      document.getElementById('totalMissed').innerText = totMissed;
+      document.getElementById('totalBunks').innerText = overall.bunks;
+
+      // Color coding radial
+      let color = '#10b981';
+      if (overall.pct < targetPct) color = '#ef4444';
+      else if (overall.pct < targetPct + 5) color = '#f59e0b';
+      document.getElementById('overallRadial').style.background = `conic-gradient(${color} calc(${overall.pct} * 1%), var(--card-border) 0)`;
+
+      // Subjects list
+      const grid = document.getElementById('subjectsGrid');
+      grid.innerHTML = '';
+
+      let safeCount = 0, warningCount = 0, dangerCount = 0;
+      let insights = [];
+
+      subjects.forEach((s, idx) => {
+        const total = s.attended + s.missed;
+        const calc = calculateBunkAndRecovery(s.attended, total, targetPct);
+        
+        let statusClass = 'safe';
+        let statusBadge = `<span class="subj-status-badge" style="background:var(--success-light); color:#34d399;">Safe (${calc.bunks} bunks left)</span>`;
+        if (calc.pct < targetPct) {
+          statusClass = 'danger';
+          statusBadge = `<span class="subj-status-badge" style="background:var(--danger-light); color:#f87171;">Need ${calc.recovery} classes</span>`;
+          dangerCount++;
+          insights.push(`🚨 <b>${s.name}</b> is below ${targetPct}%. Attend next ${calc.recovery} classes consecutively.`);
+        } else {
+          safeCount++;
+          if (calc.bunks === 0) {
+            statusBadge = `<span class="subj-status-badge" style="background:var(--warning-light); color:#fbbf24;">On Edge (0 bunks left)</span>`;
+            warningCount++;
+            insights.push(`⚠️ <b>${s.name}</b> is on the edge. You cannot miss the next class.`);
+          }
+        }
+
+        const barColor = calc.pct >= targetPct ? '#10b981' : '#ef4444';
+
+        const card = document.createElement('div');
+        card.className = 'subj-card';
+        card.innerHTML = `
+          <div class="subj-header">
+            <div>
+              <div class="subj-title">${s.name}</div>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">${s.attended} / ${total} classes attended</div>
+            </div>
+            <div class="subj-actions">
+              <button class="btn-sm quick-btn" onclick="openModal(${idx})">Edit</button>
+              <button class="btn-sm quick-btn btn-danger" onclick="deleteSubject(${idx})">✕</button>
+            </div>
+          </div>
+          <div class="progress-bar-container">
+            <div class="progress-bar-fill" style="width: ${Math.min(100, calc.pct)}%; background: ${barColor};"></div>
+          </div>
+          <div class="subj-stats-row">
+            <span>Score: <b>${calc.pct.toFixed(1)}%</b></span>
+            ${statusBadge}
+          </div>
+          <div class="subj-quick-btns">
+            <button class="quick-btn" onclick="quickAdd(${idx}, 'attended')">+ Attended</button>
+            <button class="quick-btn" onclick="quickAdd(${idx}, 'missed')">+ Missed</button>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+
+      // Smart Insights UI
+      const insightsList = document.getElementById('insightsList');
+      if (subjects.length === 0) {
+        insightsList.innerHTML = `<div class="insight-item safe">Add subjects to view smart attendance insights.</div>`;
+      } else {
+        let html = '';
+        if (dangerCount === 0 && warningCount === 0) {
+          html += `<div class="insight-item safe">🎉 Great job! All ${subjects.length} subjects are safely above ${targetPct}%.</div>`;
+        }
+        insights.forEach(msg => {
+          const type = msg.includes('🚨') ? 'danger' : 'warning';
+          html += `<div class="insight-item ${type}">${msg}</div>`;
+        });
+        insightsList.innerHTML = html;
+      }
+
+      runSim();
+      saveToStorage();
+    }
+
+    function quickAdd(idx, type) {
+      if (type === 'attended') subjects[idx].attended++;
+      else subjects[idx].missed++;
+      render();
+    }
+
+    function deleteSubject(idx) {
+      subjects.splice(idx, 1);
+      render();
+    }
+
+    function openModal(idx = null) {
+      const modal = document.getElementById('modalOverlay');
+      if (idx !== null) {
+        document.getElementById('modalTitle').innerText = 'Edit Subject';
+        document.getElementById('editIndex').value = idx;
+        document.getElementById('subjName').value = subjects[idx].name;
+        document.getElementById('subjAttended').value = subjects[idx].attended;
+        document.getElementById('subjMissed').value = subjects[idx].missed;
+      } else {
+        document.getElementById('modalTitle').innerText = 'Add New Subject';
+        document.getElementById('editIndex').value = '-1';
+        document.getElementById('subjName').value = '';
+        document.getElementById('subjAttended').value = '0';
+        document.getElementById('subjMissed').value = '0';
+      }
+      modal.style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('modalOverlay').style.display = 'none';
+    }
+
+    function saveSubject() {
+      const idx = parseInt(document.getElementById('editIndex').value);
+      const name = document.getElementById('subjName').value.trim() || 'Untitled Subject';
+      const attended = parseInt(document.getElementById('subjAttended').value) || 0;
+      const missed = parseInt(document.getElementById('subjMissed').value) || 0;
+
+      if (idx >= 0) {
+        subjects[idx] = { name, attended, missed };
+      } else {
+        subjects.push({ name, attended, missed });
+      }
+
+      closeModal();
+      render();
+    }
+
+    function runSim() {
+      const att = parseInt(document.getElementById('simAttended').value) || 0;
+      const tot = parseInt(document.getElementById('simTotal').value) || 0;
+      const resDiv = document.getElementById('simResult');
+
+      if (tot <= 0 || att > tot) {
+        resDiv.className = 'insight-item warning';
+        resDiv.innerText = 'Please enter valid total and attended classes.';
+        return;
+      }
+
+      const res = calculateBunkAndRecovery(att, tot, targetPct);
+      if (res.pct >= targetPct) {
+        resDiv.className = 'insight-item safe';
+        resDiv.innerHTML = `Current: <b>${res.pct.toFixed(1)}%</b>. You can safely miss <b>${res.bunks}</b> more class(es) to stay above ${targetPct}%.`;
+      } else {
+        resDiv.className = 'insight-item danger';
+        resDiv.innerHTML = `Current: <b>${res.pct.toFixed(1)}%</b>. You must attend the next <b>${res.recovery}</b> class(es) to reach ${targetPct}%.`;
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>
