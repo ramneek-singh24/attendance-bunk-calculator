@@ -14,34 +14,31 @@ A clean, responsive single-page web app for university & college students to man
 - **Scenario Simulator**: Test custom "what-if" numbers without altering saved subject data.
 - **Local Storage**: Automatically saves your subjects and data locally in your browser.
 
+---here's a working live demo https://attendance-bunk-calculator.vercel.app/
+
+##ATTENDANCE & BUNK CALCULATOR
+
+## Tagline: Know your attendance. Plan your classes. Stay on track.
+
+Core features
+1. Overall attendance dashboard
+- Total classes conducted.
+- Classes attended and missed.
+- Current attendance percentage.
+- Visual progress indicator.
+2. Subject-wise attendance
+- Add subjects.
+- Track attendance separately for each subject.
+- Edit attendance records.
+3. Bunk calculator
+- Calculate how many future classes you can miss while maintaining a chosen attendance threshold.
+- Show when attendance is too low to miss another class.
+4. Attendance recovery calculator
+- Calculate how many consecutive classes you need to attend to reach your target percentage.
+5. Smart insights
+- Subjects below the target.
+- Subjects safely above the target.
+- Attendance warnings.
+
 ---
-
-## 🛠️ How to Publish on GitHub Pages (Step-by-Step)
-
-Follow these simple steps to host this project for free on GitHub Pages:
-
-### Step 1: Create a GitHub Repository
-1. Log in to your [GitHub Account](https://github.com/).
-2. Click the **+** icon in the top right corner and select **New repository**.
-3. Name your repository (e.g., `attendance-calculator`).
-4. Set visibility to **Public**.
-5. Click **Create repository**.
-
-### Step 2: Upload Files
-1. Click **uploading an existing file** link on your new repository page.
-2. Drag and drop `index.html` (and optionally `README.md`) into the web interface.
-3. Scroll down and click **Commit changes**.
-
-### Step 3: Turn On GitHub Pages
-1. In your repository, click the **Settings** tab at the top right.
-2. In the left menu sidebar, scroll to **Pages** under *Code and automation*.
-3. Under **Build and deployment** -> **Branch**, select `main` (or `master`) branch from the dropdown menu.
-4. Keep folder set to `/ (root)` and click **Save**.
-5. Wait 1 to 2 minutes. GitHub will generate your live site URL:
-   `https://<your-username>.github.io/attendance-calculator/`
-
----
-
-## 💻 Running Locally
-
-Simply download or extract the files and double-click `index.html` to open it in any modern browser!
+THANK YOU
